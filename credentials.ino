@@ -18,7 +18,9 @@ void loadCredentials() {
   EEPROM.get(address, mqtt_user);
   address += sizeof(mqtt_user);  
   EEPROM.get(address, mqtt_pass);
-  address += sizeof(mqtt_pass);  
+  address += sizeof(mqtt_pass); 
+  EEPROM.get(address, mqtt_syncFreq);
+  address += sizeof(mqtt_syncFreq);   
   EEPROM.get(address, ok);
   address += sizeof(ok);  
        
@@ -32,24 +34,8 @@ void loadCredentials() {
     mqtt_secure = false;
     mqtt_user[0] = 0;
     mqtt_pass[0] = 0;
-  }
-/*
-  Serial.println("Recovered data:");
-  Serial.print("wifi_ssid:");
-  Serial.println(wifi_ssid);
-  Serial.print("wifi_pass:");
-  Serial.println(wifi_pass);
-  Serial.print("mqtt_server:");
-  Serial.println(mqtt_server);
-  Serial.print("mqtt_port:");
-  Serial.println(mqtt_port);
-  Serial.print("mqtt_secure:");
-  Serial.println(mqtt_secure);    
-  Serial.print("mqtt_user:");
-  Serial.println(mqtt_user);   
-  Serial.print("mqtt_pass:");
-  Serial.println(mqtt_pass);     
-*/
+    mqtt_syncFreq = 30;
+    }
 }
 
 /** Store WLAN credentials to EEPROM */
@@ -73,6 +59,8 @@ void saveCredentials() {
   address += sizeof(mqtt_user);
   EEPROM.put(address, mqtt_pass);
   address += sizeof(mqtt_pass);
+  EEPROM.put(address, mqtt_syncFreq);
+  address += sizeof(mqtt_syncFreq); 
   EEPROM.put(address, ok);
   address += sizeof(ok);
     
@@ -101,10 +89,11 @@ void clearCredentials() {
   address += sizeof(mqtt_user);
   EEPROM.put(address, "");
   address += sizeof(mqtt_pass);
+  EEPROM.put(address, 60);
+  address += sizeof(mqtt_syncFreq); 
   EEPROM.put(address, ok);
   address += sizeof(ok);
     
   EEPROM.commit();
   EEPROM.end();
 }
-

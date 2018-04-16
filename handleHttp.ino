@@ -1,3 +1,24 @@
+/** Is this an IP? */
+boolean isIp(String str) {
+  for (int i = 0; i < str.length(); i++) {
+    int c = str.charAt(i);
+    if (c != '.' && (c < '0' || c > '9')) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/** IP to String? */
+String toStringIp(IPAddress ip) {
+  String res = "";
+  for (int i = 0; i < 3; i++) {
+    res += String((ip >> (8 * i)) & 0xFF) + ".";
+  }
+  res += String(((ip >> 8 * 3)) & 0xFF);
+  return res;
+}
+
 /** Redirect to captive portal if we got a request for another domain. Return true in that case so the page handler do not try to handle the request again. */
 boolean captivePortal() {
 //  Serial.println("captivePortal");
@@ -45,7 +66,9 @@ void handleRoot() {
     "</select><br/><input type='password' name='wifi_password' placeholder='Wi-Fi Password' value='" + String(wifi_pass) + "'/><br/>"
     "<input type='text' name='mqtt_server' placeholder='MQTT server address' value='" + String(mqtt_server) + "'/><br/><input type='text' name='mqtt_port' placeholder='MQTT server port' value='" + String(mqtt_port) + "'/><br/>"
     "<select name='mqtt_secure'/><option>open connection</option><option" + String((mqtt_secure == true) ? " selected" : "") + ">secured</option></select><br/><input type='text' name='mqtt_user' placeholder='MQTT Username' value='" + String(mqtt_user) + "'/><br/>"
-    "<input type='password' name='mqtt_pass' placeholder='MQTT Password' value='" + String(mqtt_pass) + "'/><br/><input type='submit' value='SAVE'/></form>"
+    "<input type='password' name='mqtt_pass' placeholder='MQTT Password' value='" + String(mqtt_pass) + "'/><br/>"
+    "<input type='text' name='mqtt_syncFreq' placeholder='Sync frequency, pulses' value='" + String(mqtt_syncFreq) + "'/><br/>"
+    "<input type='submit' value='SAVE'/></form>"
   );  
   if (strlen(wifi_ssid) != 0){
     server.sendContent(
@@ -71,6 +94,7 @@ void handleWifiSave() {
   if (server.arg("mqtt_secure") == "secured") mqtt_secure = true;
   server.arg("mqtt_user").toCharArray(mqtt_user, sizeof(mqtt_user) - 1);
   server.arg("mqtt_pass").toCharArray(mqtt_pass, sizeof(mqtt_pass) - 1);
+  mqtt_syncFreq = server.arg("mqtt_syncFreq").toInt();
 
   saveCredentials();
   
@@ -88,7 +112,7 @@ void handleWifiSave() {
     "<script>var delay = 15; var el = document.getElementById('countdown'); el.innerHTML = 'in ' + delay + ' seconds ...'; var countdown = setInterval(function() { if (delay>0) { el.innerHTML = 'in ' + delay + ' seconds ...'; delay = delay-1;} }, 1000); var timer = setTimeout(function() { window.location='http://atomigy.com' }, delay * 1000);</script></body></html>"
   );
   server.client().stop();                 // Stop is needed because we sent no content length
-  Serial.println("RESTART");
+  //Serial.println("RESTART");
   ESP.restart();
 }
 
